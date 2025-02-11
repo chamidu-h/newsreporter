@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">@color/purple_500</color>
+    <color name="colorPrimaryDark">@color/purple_700</color>
+    <color name="colorAccent">@color/teal_500</color>
+    <color name="colorPrimaryVariant">@color/purple_900</color>
+    <color name="colorSecondary">@color/teal_300</color>
+    <color name="colorSecondaryVariant">@color/teal_700</color>
+    <color name="colorSurface">@color/white</color>
+    <color name="colorOnPrimary">@color/white</color>
+    <color name="colorOnSecondary">@color/black</color>
+    <color name="colorOnBackground">@color/black</color>
+    <color name="colorOnSurface">@color/black</color>
+
+    <!-- Original colors -->
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="purple_400">#7E57C2</color>
+    <color name="purple_900">#4a148c</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="teal_700">#018786</color>
+    <color name="teal_500">#0097A7</color>
+    <color name="teal_300">#0097A7</color>
+    <color name="black">#000000</color>
+    <color name="gray_hint">#808080</color>
+</resources>

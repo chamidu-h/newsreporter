@@ -1,0 +1,53 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center"
+    android:background="@android:color/white">
+
+    <!-- App Title -->
+    <TextView
+        android:id="@+id/app_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="News Reporter App"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Navigate to Drafting Page -->
+    <Button
+        android:id="@+id/btn_draft_article"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Draft New Article"
+        android:padding="12dp"
+        android:backgroundTint="@color/teal_300"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Navigate to Saved Drafts -->
+    <Button
+        android:id="@+id/btn_view_saved_drafts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Saved Drafts"
+        android:padding="12dp"
+        android:backgroundTint="@color/teal_300"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Navigate to Submitted Articles -->
+    <Button
+        android:id="@+id/btn_view_submitted_articles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Submitted Articles"
+        android:padding="12dp"
+        android:backgroundTint="@color/teal_300"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="16dp" />
+
+</LinearLayout>
