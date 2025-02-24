@@ -53,6 +53,12 @@ android {
 
 
 dependencies {
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
+    implementation ("com.google.android.material:material:1.6.0")
+
+
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")

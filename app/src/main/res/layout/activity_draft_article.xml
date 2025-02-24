@@ -1,80 +1,203 @@
-<androidx.constraintlayout.widget.ConstraintLayout
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+<com.google.android.material.appbar.AppBarLayout
+    android:id="@+id/appBarLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-    <!-- Header for the drafting interface -->
-    <TextView
-        android:id="@+id/header_title"
-        android:layout_width="0dp"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/teal_700"
+        app:title="Draft Article"
+        app:titleTextColor="@android:color/white"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:menu="@menu/menu_draft_article"/>
+
+</com.google.android.material.appbar.AppBarLayout>
+
+<androidx.core.widget.NestedScrollView
+android:id="@+id/nested_scroll_view"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:fillViewport="true"
+android:paddingBottom="80dp"
+android:clipToPadding="false"
+app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Draft Your News Article"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:padding="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Article title input with refined styling -->
-    <EditText
-        android:id="@+id/article_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Article Title"
-        android:textSize="20sp"
-        android:padding="12dp"
-        android:inputType="textCapSentences|textMultiLine"
-        android:background="@android:drawable/edit_text"
-        app:layout_constraintTop_toBottomOf="@id/header_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp" />
-
-    <!-- RecyclerView for article content -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/content_recycler_view"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="16dp"
-        android:paddingBottom="200dp"
-        android:clipToPadding="false"
-        app:layout_constraintTop_toBottomOf="@id/article_title"
-        app:layout_constraintBottom_toTopOf="@id/btn_save_draft"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:scrollbars="vertical" />
-
-
-    <!-- Save Draft button -->
-    <Button
-        android:id="@+id/btn_save_draft"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Save Draft"
-        android:textAllCaps="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:cardElevation="4dp"
+        app:cardCornerRadius="8dp">
 
-    <!-- Floating Action Button for adding new content elements -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Article Title"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/article_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:maxLines="2"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Category"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <AutoCompleteTextView
+                    android:id="@+id/category_dropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Article Content"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@color/teal_700"
+                android:padding="16dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/content_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="200dp"
+                android:clipToPadding="false"
+                android:padding="16dp"/>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>
+
+</androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bottomAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:fabAlignmentMode="end">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
+
+            <!-- Left: Add Element button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_element"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="Add Element"
+                android:textSize="12sp"
+                app:icon="@android:drawable/ic_input_add"
+                app:iconSize="16dp"
+                style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+            <!-- Space to push the center and right buttons away from the left -->
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- Center: Save Draft button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save_draft"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="Save Draft"
+                android:textSize="12sp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+            <!-- Space to keep Submit on the far right -->
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- Right: Submit button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_submit_article"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="Submit"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+    </com.google.android.material.bottomappbar.BottomAppBar>
+
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/add_element_button"
+        android:id="@+id/fab_preview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_input_add"
-        android:contentDescription="Add new element"
-        android:elevation="6dp"
-        app:layout_constraintBottom_toTopOf="@id/btn_save_draft"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp" />
+        android:src="@android:drawable/ic_menu_view"
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    app:layout_anchor="@id/bottomAppBar"
+    app:layout_anchorGravity="top|end"
+    app:fabSize="mini"
+    app:tint="@android:color/white"
+
+    android:layout_marginEnd="62dp"
+    android:layout_marginBottom="62dp" />
+
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

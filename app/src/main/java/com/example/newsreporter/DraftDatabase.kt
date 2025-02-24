@@ -1,7 +1,6 @@
 package com.example.newsreporter
 
 import android.content.Context
-import android.database.Cursor
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -9,7 +8,8 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Draft::class], version = 4)
+
+@Database(entities = [Draft::class], version = 6)
 @TypeConverters(ArticleElementConverter::class)
 abstract class DraftDatabase : RoomDatabase() {
     abstract fun draftDao(): DraftDao
@@ -25,7 +25,7 @@ abstract class DraftDatabase : RoomDatabase() {
                     DraftDatabase::class.java,
                     "draft_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
@@ -35,18 +35,18 @@ abstract class DraftDatabase : RoomDatabase() {
 
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Create a new table with the updated schema
-                database.execSQL("""
+                database.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS new_drafts (
                         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         title TEXT NOT NULL,
                         content TEXT NOT NULL DEFAULT '[]',
                         status TEXT NOT NULL
                     )
-                """)
-
-                // Copy the data from the old table to the new table
-                database.execSQL("""
+                    """.trimIndent()
+                )
+                database.execSQL(
+                    """
                     INSERT INTO new_drafts (id, title, content, status)
                     SELECT id, 
                            COALESCE(title, ''), 
@@ -57,20 +57,17 @@ abstract class DraftDatabase : RoomDatabase() {
                            END,
                            COALESCE(status, 'Draft')
                     FROM drafts
-                """)
-
-                // Remove the old table
+                    """.trimIndent()
+                )
                 database.execSQL("DROP TABLE IF EXISTS drafts")
-
-                // Rename the new table to the correct name
                 database.execSQL("ALTER TABLE new_drafts RENAME TO drafts")
             }
         }
 
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Simple update to ensure content is not null and has a default value
-                database.execSQL("""
+                database.execSQL(
+                    """
                     UPDATE drafts 
                     SET content = CASE 
                         WHEN content IS NULL OR trim(content) = '' 
@@ -79,13 +76,13 @@ abstract class DraftDatabase : RoomDatabase() {
                         THEN '[{"type":"PARAGRAPH","content":"' || replace(content, '"', '\\"') || '"}]'
                         ELSE content 
                     END
-                """)
+                    """.trimIndent()
+                )
             }
         }
 
         private val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Check if the timestamp column exists
                 val cursor = database.query("PRAGMA table_info(drafts)")
                 var hasTimestamp = false
                 cursor.use { c ->
@@ -98,30 +95,40 @@ abstract class DraftDatabase : RoomDatabase() {
                         }
                     }
                 }
-
                 if (hasTimestamp) {
-                    // Create a new table without the timestamp column
-                    database.execSQL("""
+                    database.execSQL(
+                        """
                         CREATE TABLE new_drafts (
                             id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                             title TEXT NOT NULL,
                             content TEXT NOT NULL,
                             status TEXT NOT NULL
                         )
-                    """)
-
-                    // Copy data from the old table to the new one, excluding the timestamp
-                    database.execSQL("""
+                        """.trimIndent()
+                    )
+                    database.execSQL(
+                        """
                         INSERT INTO new_drafts (id, title, content, status)
                         SELECT id, title, content, status FROM drafts
-                    """)
-
-                    // Drop the old table
+                        """.trimIndent()
+                    )
                     database.execSQL("DROP TABLE drafts")
-
-                    // Rename the new table
                     database.execSQL("ALTER TABLE new_drafts RENAME TO drafts")
                 }
+            }
+        }
+
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE drafts ADD COLUMN lastModified INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("UPDATE drafts SET lastModified = (strftime('%s','now') * 1000) WHERE lastModified = 0")
+            }
+        }
+
+        // New migration: version 5 -> 6 adds the 'category' column
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE drafts ADD COLUMN category TEXT NOT NULL DEFAULT 'General'")
             }
         }
     }

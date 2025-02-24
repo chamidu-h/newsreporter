@@ -5,14 +5,18 @@ import androidx.room.*
 @Dao
 interface DraftDao {
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveDraft(draft: Draft)
+
     @Query("SELECT * FROM drafts WHERE id = :id")
     suspend fun getDraftById(id: Int): Draft?
 
-    @Query("SELECT * FROM drafts WHERE status = :status ORDER BY id DESC")
-    suspend fun getDraftsByStatus(status: String): List<Draft>
+    @Query("SELECT * FROM drafts WHERE status = :status ORDER BY lastModified DESC")
+    fun getDraftsByStatus(status: String): List<Draft>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun saveDraft(draft: Draft)
+    @Query("SELECT * FROM drafts WHERE status = :status AND category = :category")
+    suspend fun getDraftsByStatusAndCategory(status: String, category: String): List<Draft>
+
 
     @Update
     suspend fun updateDraft(draft: Draft)

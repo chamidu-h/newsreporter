@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">newsreporter</string>
+    <string name="app_name">News Reporter</string>
+    <!-- other strings -->
 </resources>

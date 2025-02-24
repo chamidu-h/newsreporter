@@ -1,19 +1,18 @@
 package com.example.newsreporter
 
-import android.app.Activity
+
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -21,19 +20,39 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android. graphics. ImageDecoder
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
+import androidx.core.widget.NestedScrollView
+import java.io.File
+import java.io.FileOutputStream
 
 class DraftArticleActivity : AppCompatActivity() {
 
     private lateinit var database: DraftDatabase
-    private lateinit var titleInput: EditText
+    private lateinit var titleInput: TextInputEditText
+    private lateinit var categoryDropdown: AutoCompleteTextView
     private lateinit var contentRecyclerView: RecyclerView
-    private lateinit var addElementButton: FloatingActionButton
-    private lateinit var saveDraftButton: Button
+    private lateinit var addElementButton: MaterialButton
+    private lateinit var saveDraftButton: MaterialButton
+    private lateinit var submitArticleButton: MaterialButton
+    private lateinit var fabPreview: FloatingActionButton
+    private lateinit var toolbar: MaterialToolbar
+
     private var draftId: Int = -1
     private lateinit var contentAdapter: ArticleContentAdapter
     private var currentFocusedPosition: Int = 0
@@ -41,39 +60,65 @@ class DraftArticleActivity : AppCompatActivity() {
     // Used to remember which element needs an image update.
     private var imageElementPosition: Int = -1
 
-    // Register an ActivityResultLauncher for image picking.
+    // Single image picker launcher instance.
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_draft_article)
+        val nestedScrollView = findViewById<NestedScrollView>(R.id.nested_scroll_view)
+        val baseBottomPadding = resources.getDimensionPixelSize(R.dimen.bottom_padding) // 80dp
+
+        ViewCompat.setOnApplyWindowInsetsListener(nestedScrollView) { view, windowInsets ->
+            val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            // Add both IME and system bar insets to ensure proper spacing
+            val totalBottomPadding = baseBottomPadding + imeInsets.bottom + systemBars.bottom
+
+            view.updatePadding(bottom = totalBottomPadding)
+            windowInsets
+        }
 
         initializeViews()
+        setupToolbar()
+        setupCategoryDropdown()
         setupRecyclerView()
         setupListeners()
         setupImagePickerLauncher()
 
         draftId = intent.getIntExtra("DRAFT_ID", -1)
-        if (draftId == -1) {
-            titleInput.setText("Title")
-        } else {
-            loadDraft(draftId)
-        }
+        loadDraft(draftId)
     }
 
     private fun initializeViews() {
         titleInput = findViewById(R.id.article_title)
+        categoryDropdown = findViewById(R.id.category_dropdown)
         contentRecyclerView = findViewById(R.id.content_recycler_view)
-        addElementButton = findViewById(R.id.add_element_button)
+        addElementButton = findViewById(R.id.btn_add_element)
         saveDraftButton = findViewById(R.id.btn_save_draft)
+        submitArticleButton = findViewById(R.id.btn_submit_article)
+        fabPreview = findViewById(R.id.fab_preview)
+        toolbar = findViewById(R.id.toolbar)
         database = DraftDatabase.getDatabase(this)
     }
 
+    private fun setupToolbar() {
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.setNavigationOnClickListener { finish() }
+        // Optionally, you can inflate a menu here.
+    }
+
+    private fun setupCategoryDropdown() {
+        // If you have an array resource, for example R.array.article_categories:
+        val categories = resources.getStringArray(R.array.article_categories)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, categories)
+        categoryDropdown.setAdapter(adapter)
+    }
+
     private fun setupRecyclerView() {
-        // Start with a single empty paragraph element.
-        val defaultContent = mutableListOf(
-            ArticleElement(ElementType.PARAGRAPH, "")
-        )
+        val defaultContent = mutableListOf(ArticleElement(ElementType.PARAGRAPH, ""))
         contentAdapter = ArticleContentAdapter(defaultContent) { position ->
             currentFocusedPosition = position
         }
@@ -88,31 +133,84 @@ class DraftArticleActivity : AppCompatActivity() {
         saveDraftButton.setOnClickListener {
             saveDraft()
         }
+        submitArticleButton.setOnClickListener {
+            submitArticleToBackend()
+        }
+        fabPreview.setOnClickListener {
+            previewArticle()
+        }
     }
 
+    private fun copyUriToPersistentFile(context: Context, uri: Uri): Uri? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+            // Create (if necessary) a persistent directory for draft images.
+            val dir = File(context.filesDir, "draft_images")
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+            // Create a unique file name.
+            val file = File(dir, "draft_${System.currentTimeMillis()}.jpg")
+            FileOutputStream(file).use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+            inputStream.close()
+            // Return a file URI for this persistent file.
+            Uri.fromFile(file)
+        } catch (e: Exception) {
+            Log.e("DraftArticle", "Error copying image to persistent storage: ${e.message}")
+            null
+        }
+    }
+
+
+
+    /**
+     * Sets up the image picker launcher.
+     * Immediately shows a local preview, then uploads in the background.
+     */
     private fun setupImagePickerLauncher() {
-        imagePickerLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
+        imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
                 val data = result.data
                 val uri: Uri? = data?.data
                 if (uri != null && imageElementPosition != -1) {
-                    // Get the persistable flags from the result
-                    var flags = data.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    // If for some reason flags is 0, ensure we pass a valid flag.
+                    // Capture the current element position
+                    val currentImagePos = imageElementPosition
+
+                    // Request persistable permission (for SAF)
+                    val dataFlags = data.flags
+                    var flags = dataFlags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     if (flags == 0) {
                         flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                     }
                     try {
-                        // Persist the permission so the image is accessible later.
                         contentResolver.takePersistableUriPermission(uri, flags)
                     } catch (e: SecurityException) {
                         e.printStackTrace()
-                        // Optionally notify the user or log the error.
                     }
-                    // Update the element with the image URI.
-                    contentAdapter.updateElementContentAt(imageElementPosition, uri.toString())
+
+                    // Copy the image to a persistent location
+                    val persistentUri = copyUriToPersistentFile(this, uri)
+                    if (persistentUri != null) {
+                        // Update adapter with persistent URI (for a reliable preview)
+                        contentAdapter.updateElementContentAt(currentImagePos, persistentUri.toString())
+                    } else {
+                        // Fallback to the original URI if copying fails.
+                        contentAdapter.updateElementContentAt(currentImagePos, uri.toString())
+                    }
+
+                    // Start upload using the original URI (or persistentUri if you prefer)
+                    ImageUploader.uploadImage(this, uri) { serverUrl ->
+                        runOnUiThread {
+                            if (serverUrl != null) {
+                                // Replace the local persistent URI with the public server URL
+                                contentAdapter.updateElementContentAt(currentImagePos, serverUrl)
+                            } else {
+                                Toast.makeText(this, "Failed to upload image", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
                 }
             }
             imageElementPosition = -1
@@ -120,17 +218,22 @@ class DraftArticleActivity : AppCompatActivity() {
     }
 
 
-    /**
-     * Show a dialog to let the user select an element type.
-     * Now includes IMAGE (while still excluding VIDEO).
-     */
-    private fun showElementSelectorDialog() {
-        // Include IMAGE, but exclude VIDEO.
-        val types = ElementType.values().filterNot { it == ElementType.VIDEO }
-        val typeNames = types.map {
-            it.name.lowercase().replaceFirstChar { char -> char.uppercase() }
-        }.toTypedArray()
 
+
+
+    fun startImagePickerForElement(position: Int) {
+        imageElementPosition = position
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "image/*"
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        imagePickerLauncher.launch(intent)
+    }
+
+    private fun showElementSelectorDialog() {
+        val types = ElementType.values().filterNot { it == ElementType.VIDEO }
+        val typeNames = types.map { it.name.lowercase().replaceFirstChar { char -> char.uppercase() } }.toTypedArray()
         AlertDialog.Builder(this)
             .setTitle("Select Element Type")
             .setItems(typeNames) { _, which ->
@@ -140,45 +243,32 @@ class DraftArticleActivity : AppCompatActivity() {
             .show()
     }
 
-    /**
-     * Inserts an element at the current focus position.
-     * For IMAGE elements, launches the image picker after inserting/updating.
-     */
     private fun insertElementAtCurrentPosition(type: ElementType) {
         val currentElement = contentAdapter.getContent().getOrNull(currentFocusedPosition)
         if (currentElement != null) {
-            val viewHolder =
-                contentRecyclerView.findViewHolderForAdapterPosition(currentFocusedPosition)
+            val viewHolder = contentRecyclerView.findViewHolderForAdapterPosition(currentFocusedPosition)
             if (viewHolder is ArticleContentAdapter.ViewHolder) {
                 val editText = viewHolder.itemView.findViewById<EditText>(R.id.content_text)
                 val currentContent = editText.text.toString()
-                // If the content is empty (ignoring whitespace), update the type in place.
                 if (currentContent.trim().isEmpty()) {
                     contentAdapter.updateElementTypeAt(currentFocusedPosition, type)
-                    // For an image element, immediately launch the picker.
                     if (type == ElementType.IMAGE) {
                         startImagePickerForElement(currentFocusedPosition)
                     }
                     return
                 }
-                // Otherwise, split the content at the cursor position.
                 val cursorPosition = editText.selectionStart
                 val textBeforeCursor = currentContent.substring(0, cursorPosition)
                 val textAfterCursor = currentContent.substring(cursorPosition)
-
                 contentAdapter.updateElementContentAt(currentFocusedPosition, textBeforeCursor)
                 val newElement = ArticleElement(type, textAfterCursor)
                 contentAdapter.insertElementAfter(currentFocusedPosition, newElement)
-
-                // If the new element is an IMAGE, launch the picker.
                 if (type == ElementType.IMAGE) {
                     startImagePickerForElement(currentFocusedPosition + 1)
                 }
-
                 contentRecyclerView.post {
                     contentRecyclerView.scrollToPosition(currentFocusedPosition + 1)
-                    val newViewHolder =
-                        contentRecyclerView.findViewHolderForAdapterPosition(currentFocusedPosition + 1)
+                    val newViewHolder = contentRecyclerView.findViewHolderForAdapterPosition(currentFocusedPosition + 1)
                     if (newViewHolder is ArticleContentAdapter.ViewHolder) {
                         newViewHolder.contentView.requestFocus()
                         newViewHolder.contentView.setSelection(0)
@@ -188,21 +278,6 @@ class DraftArticleActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Launches the image picker and remembers the position to update.
-     */
-    fun startImagePickerForElement(position: Int) {
-        imageElementPosition = position
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "image/*"
-            // Add the read flag so the returned URI comes with it
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        imagePickerLauncher.launch(intent)
-    }
-
-
     private fun loadDraft(draftId: Int) {
         lifecycleScope.launch {
             try {
@@ -211,6 +286,8 @@ class DraftArticleActivity : AppCompatActivity() {
                 }
                 if (draft != null) {
                     titleInput.setText(draft.title)
+                    // Set the category dropdown text without filtering the adapter.
+                    categoryDropdown.setText(draft.category, false)
                     contentAdapter.updateContent(draft.content.toMutableList())
                 } else {
                     showToast("Draft not found")
@@ -223,6 +300,7 @@ class DraftArticleActivity : AppCompatActivity() {
 
     private fun saveDraft() {
         val title = titleInput.text.toString().trim()
+        val category = categoryDropdown.text.toString().trim()
         val content = contentAdapter.getContent()
 
         if (title.isEmpty() || content.isEmpty()) {
@@ -234,15 +312,15 @@ class DraftArticleActivity : AppCompatActivity() {
             try {
                 withContext(Dispatchers.IO) {
                     val draft = if (draftId != -1) {
-                        Draft(draftId, title, content, "Draft")
+                        Draft(draftId, title, content, category, "Draft")
                     } else {
-                        Draft(title = title, content = content, status = "Draft")
+                        Draft(title = title, content = content, category = category, status = "Draft")
                     }
                     database.draftDao().saveDraft(draft)
                 }
                 showToast("Draft Saved!")
                 if (draftId == -1) {
-                    titleInput.text.clear()
+                    titleInput.text?.clear()
                     contentAdapter.clearContent()
                 }
                 navigateToSavedDrafts()
@@ -261,11 +339,80 @@ class DraftArticleActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun submitArticleToBackend() {
+        val title = titleInput.text.toString().trim()
+        val category = categoryDropdown.text.toString().trim()
+        val contentElements = contentAdapter.getContent()
+
+        if (title.isEmpty() || contentElements.isEmpty()) {
+            Toast.makeText(this, "Title and content cannot be empty!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Serialize the list of ArticleElement objects to a JSON string.
+        val gson = Gson()
+        val contentJson = gson.toJson(contentElements)
+
+        val reporterId = UserSessionManager.getUserId()
+        if (reporterId == -1L) {
+            Toast.makeText(this, "User session not found. Please log in again.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val submissionRequest = ArticleSubmissionRequest(
+            title = title,
+            category = category,
+            content = contentJson,
+            reporterId = reporterId
+        )
+
+        RetrofitClient.articleApi.submitArticle(submissionRequest).enqueue(object : Callback<ArticleSubmissionResponse> {
+            override fun onResponse(call: Call<ArticleSubmissionResponse>, response: Response<ArticleSubmissionResponse>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@DraftArticleActivity, "Article submitted successfully!", Toast.LENGTH_SHORT).show()
+                    // Optionally, clear the drafting UI or navigate away.
+                } else {
+                    Toast.makeText(this@DraftArticleActivity, "Submission failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            override fun onFailure(call: Call<ArticleSubmissionResponse>, t: Throwable) {
+                Toast.makeText(this@DraftArticleActivity, "Error submitting article: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun previewArticle() {
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialogTheme)
+        val view = layoutInflater.inflate(R.layout.layout_article_preview, null)
+
+        // Initialize views
+        val titleView = view.findViewById<TextView>(R.id.preview_title)
+        val categoryView = view.findViewById<TextView>(R.id.preview_category)
+        val contentRecyclerView = view.findViewById<RecyclerView>(R.id.preview_content_recycler)
+
+        // Set up the preview content
+        titleView.text = titleInput.text.toString()
+        categoryView.text = categoryDropdown.text.toString()
+
+        // Filter out empty elements and the trailing blank element
+        val previewContent = contentAdapter.getContent()
+            .filter { it.content.isNotEmpty() || it.type == ElementType.IMAGE }
+
+        // Set up the preview recycler view
+        contentRecyclerView.layoutManager = LinearLayoutManager(this)
+        contentRecyclerView.adapter = PreviewAdapter(previewContent)
+
+        // Show the preview
+        bottomSheetDialog.setContentView(view)
+        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheetDialog.show()
+    }
+
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    // ... (Keep your existing adapter implementation, with modifications below)
+    // --- ArticleContentAdapter (inner class) ---
     class ArticleContentAdapter(
         private val content: MutableList<ArticleElement>,
         private val onElementFocusChanged: (Int) -> Unit
@@ -287,7 +434,7 @@ class DraftArticleActivity : AppCompatActivity() {
                         // Auto-remove an empty text element only if:
                         // • There is more than one element,
                         // • This element is NOT the trailing element,
-                        // • The element’s type is still PARAGRAPH.
+                        // • The element’s type is PARAGRAPH.
                         val pos = adapterPosition
                         if (pos != RecyclerView.NO_POSITION &&
                             content.size > 1 &&
@@ -321,23 +468,25 @@ class DraftArticleActivity : AppCompatActivity() {
                 holder.removeIcon.visibility = View.VISIBLE
 
                 if (element.content.isNotEmpty()) {
-                    try {
-                        val uri = Uri.parse(element.content)
-                        val source = ImageDecoder.createSource(holder.itemView.context.contentResolver, uri)
-                        val drawable = ImageDecoder.decodeDrawable(source)
-                        holder.imageView.setImageDrawable(drawable)
-                    } catch (e: SecurityException) {
-                        e.printStackTrace()
-                        holder.imageView.setImageResource(android.R.drawable.ic_menu_gallery)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        holder.imageView.setImageResource(android.R.drawable.ic_menu_gallery)
+                    val contentValue = element.content.trim()
+                    // Determine the proper image source:
+                    // - If it starts with "http", use it as a server URL.
+                    // - Otherwise, assume it’s a local URI (either content:// or file://).
+                    val imageSource = if (contentValue.startsWith("http", ignoreCase = true)) {
+                        contentValue
+                    } else {
+                        // This covers both local content and cached file URIs.
+                        Uri.parse(contentValue)
                     }
+                    Glide.with(holder.itemView.context)
+                        .load(imageSource)
+                        .fitCenter()
+                        .into(holder.imageView)
                 } else {
                     holder.imageView.setImageResource(android.R.drawable.ic_menu_gallery)
                 }
 
-                // Tapping the image launches the image picker.
+                // Clicking the image re-opens the image picker.
                 holder.imageView.setOnClickListener {
                     (holder.itemView.context as? DraftArticleActivity)
                         ?.startImagePickerForElement(holder.adapterPosition)
@@ -347,7 +496,7 @@ class DraftArticleActivity : AppCompatActivity() {
                     removeElementAt(holder.adapterPosition)
                 }
             } else {
-                // Text element: show the EditText; hide image view and remove icon.
+                // TEXT element: show the EditText; hide image view and remove icon.
                 holder.contentView.visibility = View.VISIBLE
                 holder.imageView.visibility = View.GONE
                 holder.removeIcon.visibility = View.GONE
@@ -378,8 +527,7 @@ class DraftArticleActivity : AppCompatActivity() {
                     override fun afterTextChanged(s: Editable?) {}
                 })
 
-                // Only auto-focus the trailing blank element if nothing else is focused.
-                // (This will not force focus if the user has already tapped elsewhere.)
+                // Auto-focus trailing blank element if needed.
                 if (position == content.size - 1 && element.content.isEmpty() &&
                     contentRecyclerView.findFocus() == null) {
                     holder.contentView.post {
@@ -388,9 +536,7 @@ class DraftArticleActivity : AppCompatActivity() {
                     }
                 }
 
-                // Handle key events:
-                // ENTER: Insert a new element (always defaulting to PARAGRAPH).
-                // DELETE at the start: Merge with the previous element.
+                // Handle Enter and Delete key events.
                 holder.contentView.setOnKeyListener { _, keyCode, event ->
                     if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
                         val pos = holder.adapterPosition
@@ -430,6 +576,7 @@ class DraftArticleActivity : AppCompatActivity() {
                 }
             }
         }
+
 
         override fun getItemCount(): Int = content.size
 
@@ -488,15 +635,7 @@ class DraftArticleActivity : AppCompatActivity() {
             }
         }
     }
-
 }
-
-
-
-
-
-
-
 
 
 

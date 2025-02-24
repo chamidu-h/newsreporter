@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="article_categories">
+        <item>All</item>
+        <item>Technology</item>
+        <item>Business</item>
+        <item>Health</item>
+        <item>Science</item>
+        <item>Sports</item>
+        <item>Entertainment</item>
+        <item>Other</item>
+    </string-array>
+</resources>

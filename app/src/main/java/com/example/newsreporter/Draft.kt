@@ -10,7 +10,9 @@ data class Draft(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
     val content: List<ArticleElement>,
+    val category: String,
     val status: String,
+    val lastModified: Long = System.currentTimeMillis()
 )
 
 
