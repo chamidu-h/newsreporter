@@ -24,8 +24,9 @@
         <activity android:name=".ArticlePreviewActivity" />
         <activity android:name=".SubmittedArticlesActivity" />
         <activity android:name=".SavedDraftsActivity" />
-        <activity android:name=".DraftArticleActivity"
-            android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:windowSoftInputMode="adjustResize"
+            android:name=".DraftArticleActivity" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -35,6 +36,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

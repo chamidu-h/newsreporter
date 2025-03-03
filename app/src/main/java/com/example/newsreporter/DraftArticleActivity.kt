@@ -1,6 +1,7 @@
 package com.example.newsreporter
 
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -12,10 +13,12 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,6 +41,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.core.widget.NestedScrollView
+import com.google.android.material.bottomappbar.BottomAppBar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
 import java.io.FileOutputStream
 
@@ -53,6 +58,14 @@ class DraftArticleActivity : AppCompatActivity() {
     private lateinit var fabPreview: FloatingActionButton
     private lateinit var toolbar: MaterialToolbar
 
+    private var originalRecyclerViewPaddingBottom = 0
+
+
+    private lateinit var bottomAppBar: BottomAppBar
+    private var defaultBottomAppBarY = 0f
+    private var isKeyboardVisible = false
+    private var keyboardHeight = 0
+
     private var draftId: Int = -1
     private lateinit var contentAdapter: ArticleContentAdapter
     private var currentFocusedPosition: Int = 0
@@ -66,26 +79,37 @@ class DraftArticleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_draft_article)
-        val nestedScrollView = findViewById<NestedScrollView>(R.id.nested_scroll_view)
-        val baseBottomPadding = resources.getDimensionPixelSize(R.dimen.bottom_padding) // 80dp
 
-        ViewCompat.setOnApplyWindowInsetsListener(nestedScrollView) { view, windowInsets ->
-            val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
-            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
-            // Add both IME and system bar insets to ensure proper spacing
-            val totalBottomPadding = baseBottomPadding + imeInsets.bottom + systemBars.bottom
-
-            view.updatePadding(bottom = totalBottomPadding)
-            windowInsets
-        }
 
         initializeViews()
         setupToolbar()
         setupCategoryDropdown()
         setupRecyclerView()
+
+        contentRecyclerView = findViewById(R.id.content_recycler_view)
+        contentRecyclerView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                originalRecyclerViewPaddingBottom = contentRecyclerView.paddingBottom
+                contentRecyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+            }
+        })
+
         setupListeners()
         setupImagePickerLauncher()
+
+        setupKeyboardAwareBottomBar()
+
+
+
+
+        // Request focus on the title field
+        titleInput.requestFocus()
+        titleInput.post {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(titleInput, InputMethodManager.SHOW_IMPLICIT)
+        }
 
         draftId = intent.getIntExtra("DRAFT_ID", -1)
         loadDraft(draftId)
@@ -101,6 +125,89 @@ class DraftArticleActivity : AppCompatActivity() {
         fabPreview = findViewById(R.id.fab_preview)
         toolbar = findViewById(R.id.toolbar)
         database = DraftDatabase.getDatabase(this)
+
+        bottomAppBar = findViewById(R.id.bottomAppBar)
+    }
+
+    // Add this new method
+    private fun setupKeyboardAwareBottomBar() {
+        // Store the default position after layout is ready
+        bottomAppBar.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                defaultBottomAppBarY = bottomAppBar.y
+                bottomAppBar.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                // After getting default position, set up the keyboard listener
+                setupKeyboardVisibilityListener()
+            }
+        })
+    }
+
+    // Add this new method
+    private fun setupKeyboardVisibilityListener() {
+        // Root view of your layout
+        val rootView = findViewById<View>(android.R.id.content)
+
+        // Using WindowInsetsControllerCompat to detect keyboard
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
+            val isKeyboardVisibleNow = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val keyboardHeightNow = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+
+            if (isKeyboardVisibleNow != isKeyboardVisible || (isKeyboardVisibleNow && keyboardHeightNow != keyboardHeight)) {
+                isKeyboardVisible = isKeyboardVisibleNow
+                keyboardHeight = keyboardHeightNow
+
+                // Animate the BottomAppBar as before
+                animateBottomBarWithKeyboard(isKeyboardVisible, keyboardHeight)
+
+                // Adjust the RecyclerView's bottom padding so that its content scrolls above the keyboard
+                contentRecyclerView.setPadding(
+                    contentRecyclerView.paddingLeft,
+                    contentRecyclerView.paddingTop,
+                    contentRecyclerView.paddingRight,
+                    if (isKeyboardVisibleNow) originalRecyclerViewPaddingBottom + keyboardHeightNow else originalRecyclerViewPaddingBottom
+                )
+            }
+            insets
+        }
+
+    }
+
+    // Add this new method
+    private fun animateBottomBarWithKeyboard(keyboardVisible: Boolean, keyboardHeight: Int) {
+        val startY = bottomAppBar.y
+        val endY = if (keyboardVisible) {
+            // Move up by keyboard height
+            defaultBottomAppBarY - keyboardHeight
+        } else {
+            // Return to original position
+            defaultBottomAppBarY
+        }
+
+        // Create value animator
+        val animator = ValueAnimator.ofFloat(startY, endY)
+        animator.duration = 250 // Duration in milliseconds
+
+        animator.addUpdateListener { animation ->
+            val value = animation.animatedValue as Float
+
+            // Move BottomAppBar
+            bottomAppBar.y = value
+
+            // The FAB will follow automatically since it's anchored to the BottomAppBar
+        }
+
+        animator.start()
+    }
+
+    override fun onBackPressed() {
+        if (isKeyboardVisible) {
+            // Hide keyboard
+            val windowInsetsController = ViewCompat.getWindowInsetsController(findViewById(android.R.id.content))
+            windowInsetsController?.hide(WindowInsetsCompat.Type.ime())
+        } else {
+            super.onBackPressed()
+        }
     }
 
     private fun setupToolbar() {
@@ -233,15 +340,28 @@ class DraftArticleActivity : AppCompatActivity() {
 
     private fun showElementSelectorDialog() {
         val types = ElementType.values().filterNot { it == ElementType.VIDEO }
-        val typeNames = types.map { it.name.lowercase().replaceFirstChar { char -> char.uppercase() } }.toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle("Select Element Type")
-            .setItems(typeNames) { _, which ->
-                val selectedType = types[which]
-                insertElementAtCurrentPosition(selectedType)
-            }
-            .show()
+        val typeNames = types.map { it.name.lowercase().replaceFirstChar { char -> char.uppercase() } }
+
+        // Inflate your custom dialog layout
+        val dialogView = layoutInflater.inflate(R.layout.dialog_element_selector, null)
+        val recyclerView = dialogView.findViewById<RecyclerView>(R.id.rvElementTypes)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // Create the dialog using MaterialAlertDialogBuilder
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .create()
+
+        // Set up the adapter with a click callback
+        recyclerView.adapter = ElementTypeAdapter(typeNames) { which ->
+            val selectedType = types[which]
+            insertElementAtCurrentPosition(selectedType)
+            dialog.dismiss() // dismiss the dialog after selection
+        }
+
+        dialog.show()
     }
+
 
     private fun insertElementAtCurrentPosition(type: ElementType) {
         val currentElement = contentAdapter.getContent().getOrNull(currentFocusedPosition)
@@ -418,6 +538,9 @@ class DraftArticleActivity : AppCompatActivity() {
         private val onElementFocusChanged: (Int) -> Unit
     ) : RecyclerView.Adapter<ArticleContentAdapter.ViewHolder>() {
 
+        // Flag to control whether the adapter should auto-focus a trailing blank element.
+        var autoFocusTrailingElement: Boolean = true
+
         // Reference to the RecyclerView (set externally or inferred from parent)
         lateinit var contentRecyclerView: RecyclerView
 
@@ -436,7 +559,8 @@ class DraftArticleActivity : AppCompatActivity() {
                         // • This element is NOT the trailing element,
                         // • The element’s type is PARAGRAPH.
                         val pos = adapterPosition
-                        if (pos != RecyclerView.NO_POSITION &&
+                        if (
+                            pos != RecyclerView.NO_POSITION &&
                             content.size > 1 &&
                             pos != content.size - 1 &&
                             contentView.text.toString().trim().isEmpty() &&
@@ -471,11 +595,10 @@ class DraftArticleActivity : AppCompatActivity() {
                     val contentValue = element.content.trim()
                     // Determine the proper image source:
                     // - If it starts with "http", use it as a server URL.
-                    // - Otherwise, assume it’s a local URI (either content:// or file://).
+                    // - Otherwise, assume it’s a local URI.
                     val imageSource = if (contentValue.startsWith("http", ignoreCase = true)) {
                         contentValue
                     } else {
-                        // This covers both local content and cached file URIs.
                         Uri.parse(contentValue)
                     }
                     Glide.with(holder.itemView.context)
@@ -495,6 +618,7 @@ class DraftArticleActivity : AppCompatActivity() {
                 holder.removeIcon.setOnClickListener {
                     removeElementAt(holder.adapterPosition)
                 }
+
             } else {
                 // TEXT element: show the EditText; hide image view and remove icon.
                 holder.contentView.visibility = View.VISIBLE
@@ -503,6 +627,8 @@ class DraftArticleActivity : AppCompatActivity() {
 
                 holder.contentView.setText(Editable.Factory.getInstance().newEditable(element.content))
                 holder.contentView.setLineSpacing(0f, 1f)
+
+                // Apply different text appearances based on element type
                 when (element.type) {
                     ElementType.HEADING ->
                         holder.contentView.setTextAppearance(R.style.CustomTextAppearance_Headline)
@@ -527,12 +653,24 @@ class DraftArticleActivity : AppCompatActivity() {
                     override fun afterTextChanged(s: Editable?) {}
                 })
 
-                // Auto-focus trailing blank element if needed.
-                if (position == content.size - 1 && element.content.isEmpty() &&
-                    contentRecyclerView.findFocus() == null) {
-                    holder.contentView.post {
-                        holder.contentView.requestFocus()
-                        contentRecyclerView.scrollToPosition(position)
+                // Gate the auto-focus for the trailing blank element:
+                // 1. Must be the last item in the list and empty
+                // 2. autoFocusTrailingElement must be true
+                // 3. No view inside the RecyclerView is focused
+                // 4. The user is not currently focusing the title input in the activity
+                if (
+                    position == content.size - 1 &&
+                    element.content.isEmpty() &&
+                    autoFocusTrailingElement &&
+                    contentRecyclerView.findFocus() == null
+                ) {
+                    val activity = holder.itemView.context as? DraftArticleActivity
+                    val currentFocusView = activity?.currentFocus
+                    if (currentFocusView?.id != R.id.article_title) {
+                        holder.contentView.post {
+                            holder.contentView.requestFocus()
+                            contentRecyclerView.scrollToPosition(position)
+                        }
                     }
                 }
 
@@ -576,7 +714,6 @@ class DraftArticleActivity : AppCompatActivity() {
                 }
             }
         }
-
 
         override fun getItemCount(): Int = content.size
 
@@ -626,7 +763,8 @@ class DraftArticleActivity : AppCompatActivity() {
 
         private fun ensureTrailingBlankElement() {
             // Ensure the list always ends with a blank paragraph.
-            if (content.isEmpty() ||
+            if (
+                content.isEmpty() ||
                 content.last().type != ElementType.PARAGRAPH ||
                 content.last().content.isNotEmpty()
             ) {
@@ -635,6 +773,8 @@ class DraftArticleActivity : AppCompatActivity() {
             }
         }
     }
+
+
 }
 
 

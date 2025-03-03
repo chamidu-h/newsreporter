@@ -17,10 +17,10 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/teal_700"
+            android:background="@color/colorPrimaryVariant"
+            app:navigationIcon="@drawable/ic_arrow_back"
             app:title="Saved Drafts"
-            app:titleTextColor="@android:color/white"
-            app:navigationIcon="@drawable/ic_arrow_back"/>
+            app:titleTextColor="@android:color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -52,11 +52,11 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="Filter by Category"
-                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimaryVariant"
                         android:textSize="16sp"
-                        android:textColor="@color/teal_700"
-                        android:layout_marginBottom="8dp"/>
+                        android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
@@ -101,9 +101,9 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Your Drafts"
-                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimaryVariant"
                             android:textSize="18sp"
-                            android:textColor="@color/teal_700"/>
+                            android:textStyle="bold" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_delete_all_drafts"
@@ -179,6 +179,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:src="@android:drawable/ic_menu_edit"
-        app:tint="@android:color/white"/>
+        app:backgroundTint="@color/colorPrimaryVariant"
+        app:tint="@android:color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

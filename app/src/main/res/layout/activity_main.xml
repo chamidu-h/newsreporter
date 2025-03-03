@@ -13,9 +13,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/teal_700"
+            android:background="@color/colorPrimaryVariant"
             app:title="News Reporter"
-            app:titleTextColor="@android:color/white"/>
+            app:titleTextColor="@android:color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -171,6 +171,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:src="@android:drawable/ic_menu_edit"
-        app:tint="@android:color/white"/>
+        app:backgroundTint="@color/colorPrimaryVariant"
+        app:tint="@android:color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
