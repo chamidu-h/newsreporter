@@ -5,14 +5,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Existing RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewSubmittedArticles"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="42dp"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/btn_view_rejected_articles"/>
+
+    <!-- New Button to open RejectedArticlesActivity -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_view_rejected_articles"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View Rejected Articles"
+        app:cornerRadius="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
 

@@ -43,6 +43,7 @@ import androidx.core.view.updatePadding
 import androidx.core.widget.NestedScrollView
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.io.FileOutputStream
 
@@ -81,28 +82,13 @@ class DraftArticleActivity : AppCompatActivity() {
         setContentView(R.layout.activity_draft_article)
 
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-
-
         initializeViews()
         setupToolbar()
         setupCategoryDropdown()
         setupRecyclerView()
-
-        contentRecyclerView = findViewById(R.id.content_recycler_view)
-        contentRecyclerView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                originalRecyclerViewPaddingBottom = contentRecyclerView.paddingBottom
-                contentRecyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
-            }
-        })
-
         setupListeners()
         setupImagePickerLauncher()
-
         setupKeyboardAwareBottomBar()
-
-
-
 
         // Request focus on the title field
         titleInput.requestFocus()
@@ -111,9 +97,22 @@ class DraftArticleActivity : AppCompatActivity() {
             imm.showSoftInput(titleInput, InputMethodManager.SHOW_IMPLICIT)
         }
 
-        draftId = intent.getIntExtra("DRAFT_ID", -1)
-        loadDraft(draftId)
+        // Check for ARTICLE_ID first
+        val articleIdStr = intent.getStringExtra("ARTICLE_ID")
+        if (!articleIdStr.isNullOrEmpty()) {
+            val articleId = articleIdStr.toLongOrNull()
+            if (articleId != null) {
+                loadArticleDetailsFromBackend(articleId)
+            } else {
+                showToast("Invalid article ID")
+            }
+        } else {
+            draftId = intent.getIntExtra("DRAFT_ID", -1)
+            loadDraft(draftId)
+        }
     }
+
+
 
     private fun initializeViews() {
         titleInput = findViewById(R.id.article_title)
@@ -397,6 +396,50 @@ class DraftArticleActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun loadArticleDetailsFromBackend(articleId: Long) {
+        RetrofitClient.articleApi.getArticleById(articleId)
+            .enqueue(object : Callback<ArticleSubmissionResponse> {
+                override fun onResponse(
+                    call: Call<ArticleSubmissionResponse>,
+                    response: Response<ArticleSubmissionResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        val article = response.body()
+                        if (article != null) {
+                            // Populate UI fields with the fetched article details
+                            titleInput.setText(article.title)
+                            categoryDropdown.setText(article.category, false)
+
+                            try {
+                                val gson = Gson()
+                                // Assuming article.content is a JSON string representing a list of ArticleElement.
+                                val contentList: MutableList<ArticleElement> = gson.fromJson(
+                                    article.content,
+                                    object : TypeToken<MutableList<ArticleElement>>() {}.type
+                                )
+                                contentAdapter.updateContent(contentList)
+                            } catch (e: Exception) {
+                                // Fallback: if parsing fails, start with a default paragraph element.
+                                contentAdapter.updateContent(mutableListOf(ArticleElement(ElementType.PARAGRAPH, "")))
+                            }
+                        } else {
+                            showToast("Article details not available")
+                            finish()
+                        }
+                    } else {
+                        showToast("Error loading article: ${response.code()}")
+                        finish()
+                    }
+                }
+                override fun onFailure(call: Call<ArticleSubmissionResponse>, t: Throwable) {
+                    showToast("Network error: ${t.localizedMessage}")
+                    finish()
+                }
+            })
+    }
+
+
 
     private fun loadDraft(draftId: Int) {
         lifecycleScope.launch {

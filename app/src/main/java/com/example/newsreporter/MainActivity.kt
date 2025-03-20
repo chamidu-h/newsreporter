@@ -113,9 +113,11 @@ class MainActivity : AppCompatActivity() {
                 response: Response<List<ArticleSubmissionResponse>>
             ) {
                 if (response.isSuccessful) {
-                    // We treat "submitted" articles as published articles.
-                    val articles = response.body()?.take(3) ?: listOf()
-                    recentPublishedAdapter.updateArticles(articles)
+                    // Sort articles descending by createdAt (newest first)
+                    val sortedArticles = response.body()?.sortedByDescending { it.createdAt } ?: listOf()
+                    // Take the first 3 items
+                    val recentArticles = sortedArticles.take(3)
+                    recentPublishedAdapter.updateArticles(recentArticles)
                 } else {
                     Toast.makeText(this@MainActivity, "Error loading published articles", Toast.LENGTH_SHORT).show()
                 }
@@ -125,6 +127,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
 
     private fun navigateToDraftArticle(draft: Draft) {
         val intent = Intent(this, DraftArticleActivity::class.java)

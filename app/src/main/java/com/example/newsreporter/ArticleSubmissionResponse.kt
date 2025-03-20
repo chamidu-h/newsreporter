@@ -8,5 +8,6 @@ data class ArticleSubmissionResponse(
     val status: String,
     val reporterId: Long,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
+    var reviewComment: String? = null
 )

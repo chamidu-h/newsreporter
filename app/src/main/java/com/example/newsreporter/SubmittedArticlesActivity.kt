@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -25,12 +26,19 @@ class SubmittedArticlesActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         adapter = SubmittedArticlesAdapter(articles) { article ->
-            // When an item is clicked, open preview activity
+            // When an item is clicked, open preview activity!
             val intent = Intent(this, ArticlePreviewActivity::class.java)
             intent.putExtra("ARTICLE_ID", article.id)
             startActivity(intent)
         }
         recyclerView.adapter = adapter
+
+        // Add this block to wire up the "View Rejected Articles" button
+        val btnViewRejectedArticles = findViewById<MaterialButton>(R.id.btn_view_rejected_articles)
+        btnViewRejectedArticles.setOnClickListener {
+            val intent = Intent(this, RejectedArticlesActivity::class.java)
+            startActivity(intent)
+        }
 
         loadSubmittedArticles()
     }
@@ -43,8 +51,10 @@ class SubmittedArticlesActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful) {
                     articles.clear()
-                    response.body()?.let {
-                        articles.addAll(it)
+                    response.body()?.let { list ->
+                        // Sort articles descending by createdAt so that the latest appears first
+                        val sortedArticles = list.sortedByDescending { it.createdAt }
+                        articles.addAll(sortedArticles)
                         adapter.notifyDataSetChanged()
                     }
                 } else {
@@ -57,3 +67,5 @@ class SubmittedArticlesActivity : AppCompatActivity() {
         })
     }
 }
+
+

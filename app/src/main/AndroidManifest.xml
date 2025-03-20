@@ -24,6 +24,7 @@
         <activity android:name=".ArticlePreviewActivity" />
         <activity android:name=".SubmittedArticlesActivity" />
         <activity android:name=".SavedDraftsActivity" />
+        <activity android:name=".RejectedArticlesActivity"/>
         <activity
             android:windowSoftInputMode="adjustResize"
             android:name=".DraftArticleActivity" />
