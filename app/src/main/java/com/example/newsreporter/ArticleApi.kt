@@ -1,11 +1,7 @@
 package com.example.newsreporter
 
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface ArticleApi {
     @POST("api/articles")
@@ -20,11 +16,26 @@ interface ArticleApi {
     @GET("api/articles/{id}")
     fun getArticleById(@Path("id") id: Long): Call<ArticleSubmissionResponse>
 
-    // These endpoints are used only by the React dashboard for editorial actions.
     @PUT("api/articles/{id}/approve")
     fun approveArticle(@Path("id") id: Long): Call<Void>
 
     @PUT("api/articles/{id}/reject")
     fun rejectArticle(@Path("id") id: Long, @Body payload: Map<String, String>): Call<ArticleSubmissionResponse>
-}
 
+    // ✅ ENHANCED: Multiple endpoint options for different scenarios
+    @GET("api/articles/all")
+    fun getAllSubmittedArticles(): Call<List<ArticleSubmissionResponse>>
+
+    @GET("api/articles/approved")
+    fun getApprovedArticles(): Call<List<ArticleSubmissionResponse>>
+
+    // ✅ ADD USER-SPECIFIC ENDPOINTS
+    @GET("api/articles/user/{userId}")
+    fun getUserArticles(@Path("userId") userId: Long): Call<List<ArticleSubmissionResponse>>
+
+    @GET("api/articles/user/{userId}/status/{status}")
+    fun getUserArticlesByStatus(
+        @Path("userId") userId: Long,
+        @Path("status") status: String
+    ): Call<List<ArticleSubmissionResponse>>
+}

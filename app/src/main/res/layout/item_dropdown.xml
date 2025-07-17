@@ -1,8 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:ellipsize="end"
-    android:maxLines="1"
-    android:textAppearance="?attr/textAppearanceSubtitle1" />
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/colorSurface">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header with Icon -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp"
+            android:paddingBottom="8dp"
+            android:background="@color/colorSurface"
+            android:alpha="0.3">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_text"
+                app:tint="@color/colorPrimary"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Text Content"
+                android:textSize="12sp"
+                android:textColor="@color/colorPrimary"
+                android:fontFamily="@font/poppins_medium"
+                android:textAllCaps="true"/>
+
+        </LinearLayout>
+
+        <!-- Enhanced Text Content -->
+        <TextView
+            android:id="@+id/textContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:paddingTop="16dp"
+            android:text="This is a sample text content that demonstrates the enhanced typography and spacing for better readability in the TRENT News application."
+            android:textSize="16sp"
+            android:textColor="@color/colorOnSurface"
+            android:fontFamily="sans-serif"
+            android:lineSpacingExtra="4dp"
+            android:ellipsize="end"
+            android:maxLines="5" />
+
+        <!-- Read More Button (Optional) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReadMore"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="Read More"
+            android:textSize="12sp"
+            android:textAllCaps="false"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

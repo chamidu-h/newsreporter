@@ -1,39 +1,255 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="@color/colorBackground"
+    android:fitsSystemWindows="true">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        app:elevation="4dp">
 
-        <TextView
-            android:id="@+id/preview_title"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@drawable/gradient_header"
+            app:title="Article Preview"
+            app:titleTextColor="@android:color/white"
+            app:navigationIcon="@drawable/ic_arrow_back_white"
+            app:titleTextAppearance="@style/ToolbarTitleStyle"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:layout_marginBottom="8dp"/>
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <TextView
-            android:id="@+id/preview_category"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@color/teal_700"
-            android:layout_marginBottom="16dp"/>
+            <!-- Enhanced Article Header Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/colorPrimary">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/preview_content_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
 
-    </LinearLayout>
+                    <!-- Preview Header with Icon -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="20dp">
 
-</androidx.core.widget.NestedScrollView>
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_marginEnd="12dp"
+                            android:src="@drawable/ic_preview"
+                            app:tint="@color/colorPrimary"
+                            android:background="@drawable/circle_background_light"
+                            android:padding="6dp"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="sans-serif-bold"
+                            android:text="Article Preview"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="20sp"
+                            android:textStyle="bold"/>
+
+                        <!-- Status Indicator -->
+                        <TextView
+                            android:id="@+id/preview_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PUBLISHED"
+                            android:textSize="10sp"
+                            android:textColor="@android:color/white"
+                            android:fontFamily="sans-serif-bold"
+                            android:background="@drawable/status_badge_published"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="4dp"
+                            android:textAllCaps="true"/>
+
+                    </LinearLayout>
+
+                    <!-- Category Badge -->
+                    <TextView
+                        android:id="@+id/tv_article_category"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Category"
+                        android:textSize="12sp"
+                        android:textColor="@android:color/white"
+                        android:fontFamily="sans-serif-medium"
+                        android:background="@drawable/category_badge_primary"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp"
+                        android:layout_marginBottom="16dp"
+                        android:textAllCaps="true"/>
+
+                    <!-- Article Title -->
+                    <TextView
+                        android:id="@+id/tv_article_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Article Title"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorOnSurface"
+                        android:fontFamily="sans-serif-bold"
+                        android:lineSpacingExtra="6dp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <!-- Article Metadata -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_calendar"
+                            app:tint="@color/colorOnSurface"
+                            android:alpha="0.6"
+                            android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tv_article_date"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Published on"
+                            android:textSize="14sp"
+                            android:textColor="@color/colorOnSurface"
+                            android:alpha="0.7"
+                            android:fontFamily="sans-serif"/>
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_preview"
+                            app:tint="@color/colorOnSurface"
+                            android:alpha="0.6"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tv_read_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="5 min read"
+                            android:textSize="14sp"
+                            android:textColor="@color/colorOnSurface"
+                            android:alpha="0.7"
+                            android:fontFamily="sans-serif"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Enhanced Content Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Content Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="20dp"
+                        android:paddingBottom="12dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_article"
+                            app:tint="@color/teal_700"
+                            android:layout_marginEnd="12dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Article Content"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/teal_700"
+                            android:fontFamily="sans-serif-bold"/>
+
+                    </LinearLayout>
+
+                    <!-- Content Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:background="@drawable/gradient_divider"
+                        android:layout_marginHorizontal="20dp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <!-- Article Content RecyclerView -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/preview_content_recycler"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:clipToPadding="false"
+                        android:padding="20dp"
+                        android:paddingTop="0dp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Enhanced Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_share_article"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:text="Share Article"
+        android:textAllCaps="false"
+        app:icon="@drawable/ic_share"
+        app:backgroundTint="@color/colorPrimary"
+        app:iconTint="@android:color/white"
+        android:textColor="@android:color/white"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

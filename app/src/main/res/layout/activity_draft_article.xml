@@ -5,34 +5,36 @@
     android:id="@+id/root_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBackground"
     android:fitsSystemWindows="true">
 
-    <!-- Top AppBar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:elevation="4dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimaryVariant"
-            app:menu="@menu/menu_draft_article"
-            app:navigationIcon="@drawable/ic_arrow_back"
+            android:background="@drawable/gradient_header"
+            app:navigationIcon="@drawable/ic_arrow_back_white"
             app:title="Draft Article"
-            app:titleTextColor="@android:color/white" />
+            app:titleTextColor="@android:color/white"
+            app:titleTextAppearance="@style/ToolbarTitleStyle"
+            app:layout_scrollFlags="scroll|enterAlways"/>
+
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Scrollable Content -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="80dp"
+        android:paddingBottom="120dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -41,25 +43,59 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Card: Title & Category -->
+            <!-- Article Details Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="8dp">
+                app:cardElevation="8dp"
+                app:cardCornerRadius="20dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
+                    <!-- Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_title"
+                            app:tint="@color/colorPrimary"
+                            android:layout_marginEnd="12dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Article Details"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimary"
+                            android:fontFamily="sans-serif-bold"/>
+
+                    </LinearLayout>
+
+                    <!-- Title Input -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Article Title"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxStrokeColor="@color/colorPrimary"
+                        app:hintTextColor="@color/colorPrimary"
+                        android:layout_marginBottom="16dp">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/article_title"
@@ -67,53 +103,85 @@
                             android:layout_height="wrap_content"
                             android:inputType="textCapSentences|textMultiLine"
                             android:maxLines="2"
-                            android:focusable="true"
-                            android:focusableInTouchMode="true"/>
+                            android:textSize="16sp"
+                            android:fontFamily="sans-serif"/>
+
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Category Dropdown -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
                         android:hint="Category"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxStrokeColor="@color/colorPrimary"
+                        app:hintTextColor="@color/colorPrimary">
 
                         <AutoCompleteTextView
                             android:id="@+id/category_dropdown"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none"/>
+                            android:inputType="none"
+                            android:textSize="16sp"
+                            android:fontFamily="sans-serif"/>
+
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card: Article Content -->
+            <!-- Content Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="8dp">
+                app:cardElevation="8dp"
+                app:cardCornerRadius="20dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Content Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="Article Content"
-                        android:textColor="@color/colorPrimaryVariant"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="24dp"
+                        android:paddingBottom="16dp">
 
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_content"
+                            app:tint="@color/colorPrimary"
+                            android:layout_marginEnd="12dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Article Content"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimary"
+                            android:fontFamily="sans-serif-bold"/>
+
+                    </LinearLayout>
+
+                    <!-- Divider -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#4D050505" />
+                        android:background="@color/colorSurface"
+                        android:layout_marginHorizontal="24dp"/>
 
+                    <!-- Content RecyclerView -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/content_recycler_view"
                         android:layout_width="match_parent"
@@ -121,25 +189,26 @@
                         android:minHeight="200dp"
                         android:clipToPadding="false"
                         android:padding="16dp"
-                        android:nestedScrollingEnabled="false" />
+                        android:nestedScrollingEnabled="false"/>
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
 
-    <!-- BottomAppBar with Buttons -->
+    <!-- Bottom App Bar -->
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:fitsSystemWindows="true"
-        app:fabAlignmentMode="end"
         app:backgroundTint="@android:color/white"
-        app:contentInsetStart="0dp">
+        app:elevation="12dp"
+        app:fabAlignmentMode="end">
 
-        <!-- Horizontal container for your 3 buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -148,61 +217,66 @@
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp">
 
-            <!-- Left: Elements Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_add_element"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/Widget.Material3.Button.TextButton.Icon"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:text="Elements"
                 android:textSize="12sp"
-                app:icon="@android:drawable/ic_input_add"
-                app:iconSize="16dp" />
+                android:textAllCaps="false"
+                app:icon="@drawable/ic_add"
+                app:iconSize="18dp"
+                app:iconTint="@color/colorPrimary"/>
 
-            <!-- Spacer pushes the next buttons to the right -->
             <Space
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_weight="1"/>
 
-            <!-- Middle: Save Draft Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_save_draft"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
                 android:text="Save Draft"
+                android:textAllCaps="false"
                 android:textSize="12sp"
-                android:layout_marginEnd="8dp" />
+                app:cornerRadius="24dp"/>
 
             <Space
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
 
-            <!-- Right: Submit Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_submit_article"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:text="Submit"
+                android:textAllCaps="false"
                 android:textSize="12sp"
-                app:backgroundTint="@color/colorPrimaryVariant" />
+                app:backgroundTint="@color/colorPrimary"
+                app:cornerRadius="24dp"/>
+
         </LinearLayout>
+
+
     </com.google.android.material.bottomappbar.BottomAppBar>
 
-    <!-- FloatingActionButton for preview -->
+    <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_preview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="62dp"
-        android:layout_marginBottom="62dp"
-        android:src="@android:drawable/ic_menu_view"
-        app:backgroundTint="@color/colorPrimaryVariant"
-        app:fabSize="mini"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="68dp"
+        android:src="@drawable/ic_preview"
+        app:backgroundTint="@color/colorSecondary"
+        app:fabSize="normal"
         app:layout_anchor="@id/bottomAppBar"
-        app:layout_anchorGravity="top|end"
-        app:tint="@android:color/white" />
+        app:layout_anchorGravity="top|center"
+        app:tint="@android:color/white"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

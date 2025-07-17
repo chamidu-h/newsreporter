@@ -35,9 +35,10 @@ class RejectedArticlesActivity : AppCompatActivity() {
             onEditClick = { article ->
                 // Open the draft editor to rework the rejected article
                 val intent = Intent(this, DraftArticleActivity::class.java)
-                intent.putExtra("ARTICLE_ID", article.id.toString()) // Convert to String if needed.
+                intent.putExtra("REJECTED_ARTICLE_ID", article.id.toString()) // Use REJECTED_ARTICLE_ID instead
                 startActivity(intent)
             }
+
 
         )
 

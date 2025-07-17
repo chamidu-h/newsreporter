@@ -5,29 +5,33 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/colorBackground"
     tools:context=".SavedDraftsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:elevation="0dp"
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimaryVariant"
-            app:navigationIcon="@drawable/ic_arrow_back"
+            android:background="@drawable/gradient_header"
+            app:navigationIcon="@drawable/ic_arrow_back_white"
             app:title="Saved Drafts"
-            app:titleTextColor="@android:color/white" />
+            app:titleTextColor="@android:color/white"
+            app:titleTextAppearance="@style/ToolbarTitleStyle"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -35,40 +39,76 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Category Filter Card -->
+            <!-- Enhanced Filter Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="8dp">
+                android:layout_marginBottom="20dp"
+                app:cardElevation="8dp"
+                app:cardCornerRadius="20dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/colorPrimary">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Filter Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="Filter by Category"
-                        android:textColor="@color/colorPrimaryVariant"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="20dp">
 
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:src="@drawable/ic_filter"
+                            app:tint="@color/colorPrimary"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/circle_background_light"
+                            android:padding="6dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Filter by Category"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimary"
+                            android:fontFamily="sans-serif-bold"/>
+
+                    </LinearLayout>
+
+                    <!-- Enhanced Dropdown -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:hint="Select Category">
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:hint="Select Category"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxStrokeColor="@color/colorPrimary"
+                        app:boxStrokeWidth="2dp"
+                        app:hintTextColor="@color/colorPrimary"
+                        app:startIconDrawable="@drawable/ic_category"
+                        app:startIconTint="@color/colorPrimary">
 
                         <AutoCompleteTextView
                             android:id="@+id/spinner_category_filter"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none"/>
+                            android:inputType="none"
+                            android:textSize="16sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:paddingVertical="16dp"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -76,91 +116,145 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Drafts List Card -->
+            <!-- Enhanced Drafts Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardElevation="4dp"
-                app:cardCornerRadius="8dp">
+                app:cardElevation="8dp"
+                app:cardCornerRadius="20dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Header -->
+                    <!-- Drafts Header -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:padding="16dp"
+                        android:padding="24dp"
+                        android:paddingBottom="16dp"
                         android:gravity="center_vertical">
 
-                        <TextView
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_drafts"
+                            app:tint="@color/colorSecondary"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/circle_background_secondary"
+                            android:padding="8dp"/>
+
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Your Drafts"
-                            android:textColor="@color/colorPrimaryVariant"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Your Drafts"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorSecondary"
+                                android:fontFamily="sans-serif-bold"/>
+
+                            <TextView
+                                android:id="@+id/tv_drafts_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 articles"
+                                android:textSize="14sp"
+                                android:textColor="@color/colorOnSurface"
+                                android:alpha="0.7"
+                                android:fontFamily="sans-serif"/>
+
+                        </LinearLayout>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_delete_all_drafts"
+                            style="@style/Widget.Material3.Button.TextButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Delete All"
                             android:textColor="@color/design_default_color_error"
-                            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+                            android:textAllCaps="false"
+                            android:textSize="12sp"
+                            app:icon="@drawable/ic_delete"
+                            app:iconTint="@color/design_default_color_error"
+                            app:iconSize="16dp"/>
 
                     </LinearLayout>
 
                     <!-- Divider -->
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#EEEEEE"/>
+                        android:layout_height="2dp"
+                        android:background="@drawable/gradient_divider"
+                        android:layout_marginHorizontal="24dp"/>
 
-                    <!-- RecyclerView -->
+                    <!-- Drafts List -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_saved_drafts"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:clipToPadding="false"
-                        android:padding="8dp"
+                        android:padding="16dp"
+                        android:nestedScrollingEnabled="false"
                         tools:listitem="@layout/item_draft"
                         tools:itemCount="3"/>
 
-                    <!-- Empty State -->
+                    <!-- Enhanced Empty State -->
                     <LinearLayout
                         android:id="@+id/empty_state_container"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="32dp"
+                        android:padding="48dp"
                         android:visibility="gone">
 
                         <ImageView
                             android:layout_width="120dp"
                             android:layout_height="120dp"
-                            android:src="@android:drawable/ic_menu_edit"
-                            app:tint="#CCCCCC"/>
+                            android:src="@drawable/ic_empty_drafts"
+                            app:tint="@color/colorPrimary"
+                            android:alpha="0.3"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="No drafts found"
-                            android:textSize="18sp"
+                            android:textSize="24sp"
                             android:textStyle="bold"
-                            android:layout_marginTop="16dp"/>
+                            android:textColor="@color/colorOnSurface"
+                            android:fontFamily="sans-serif-bold"
+                            android:layout_marginTop="24dp"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Start writing your first article"
-                            android:textColor="#757575"
+                            android:text="Start writing your first article to see it here"
+                            android:textSize="16sp"
+                            android:textColor="@color/colorOnSurface"
+                            android:alpha="0.7"
+                            android:textAlignment="center"
+                            android:fontFamily="sans-serif"
                             android:layout_marginTop="8dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_create_first_draft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Create Your First Draft"
+                            android:textAllCaps="false"
+                            app:backgroundTint="@color/colorPrimary"
+                            app:cornerRadius="24dp"
+                            android:layout_marginTop="24dp"
+                            app:icon="@drawable/ic_create"
+                            app:iconGravity="start"/>
 
                     </LinearLayout>
 
@@ -172,14 +266,19 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <!-- Enhanced FAB -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_new_draft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@android:drawable/ic_menu_edit"
-        app:backgroundTint="@color/colorPrimaryVariant"
-        app:tint="@android:color/white" />
+        android:layout_margin="24dp"
+        android:text="New Draft"
+        android:textAllCaps="false"
+        android:contentDescription="Create New Draft"
+        app:icon="@drawable/ic_create"
+        app:backgroundTint="@color/colorPrimary"
+        app:iconTint="@android:color/white"
+        android:textColor="@android:color/white"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

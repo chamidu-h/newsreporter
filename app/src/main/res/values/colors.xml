@@ -23,4 +23,13 @@
     <color name="teal_300">#03DAC5</color>
     <color name="black">#000000</color>
     <color name="gray_hint">#808080</color>
+
+    <!-- Primary Colors -->
+    <color name="colorSecondaryDark">#F4511E</color>
+
+    <!-- Surface Colors -->
+    <color name="colorBackground">#F8F9FA</color>
+
+    <!-- Additional Colors -->
+    <color name="design_default_color_error">#F44336</color>
 </resources>

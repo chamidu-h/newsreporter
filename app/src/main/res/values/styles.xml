@@ -33,5 +33,11 @@
         <item name="android:background">@android:color/transparent</item>
         <item name="behavior_peekHeight">600dp</item>
     </style>
+
+    <style name="ToolbarTitleStyle" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+    </style>
 </resources>
 

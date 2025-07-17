@@ -1,59 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_margin="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    app:strokeWidth="0dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:id="@+id/textArticleTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Article Title"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/textRejectionPreview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rejection Comment Preview"
-            android:layout_marginTop="8dp"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:padding="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:gravity="center_vertical">
 
-            <Button
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_article"
+                app:tint="@color/colorPrimary"
+                android:layout_marginEnd="12dp"/>
+
+            <TextView
+                android:id="@+id/textArticleTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Article Title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorOnSurface"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_rejected"
+                app:tint="@color/design_default_color_error"
+                android:layout_marginStart="8dp"/>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorSurface"
+            android:layout_marginVertical="16dp"/>
+
+        <TextView
+            android:id="@+id/textRejectionPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Rejection Comment Preview"
+            android:textSize="14sp"
+            android:textColor="@color/colorOnSurface"
+            android:alpha="0.7"
+            android:fontFamily="sans-serif"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:lineSpacingExtra="4dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            android:gravity="end">
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonPreview"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Preview" />
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="Preview"
+                android:textSize="14sp"
+                android:textAllCaps="false"
+                app:cornerRadius="24dp"
+                app:strokeColor="@color/colorPrimary"
+                android:layout_marginEnd="12dp"/>
 
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.1" />
-
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonEdit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Edit" />
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="Edit"
+                android:textSize="14sp"
+                android:textAllCaps="false"
+                app:cornerRadius="24dp"
+                app:backgroundTint="@color/colorPrimary"/>
+
         </LinearLayout>
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

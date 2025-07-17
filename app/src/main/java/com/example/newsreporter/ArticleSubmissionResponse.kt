@@ -5,9 +5,11 @@ data class ArticleSubmissionResponse(
     val title: String,
     val category: String,
     val content: String,
+    val preview: String? = null,
     val status: String,
-    val reporterId: Long,
+    val authorId: Long, // Change to match backend
     val createdAt: String,
     val updatedAt: String,
     var reviewComment: String? = null
 )
+

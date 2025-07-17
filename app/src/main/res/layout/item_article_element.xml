@@ -1,49 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/colorSurface">
 
-    <!-- EditText for text-based article elements -->
-    <EditText
-        android:id="@+id/content_text"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
-        android:gravity="start"
-        android:minLines="2"
-        android:scrollbars="vertical"
-        android:background="@null"
-        android:padding="8dp"
-        android:visibility="visible" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <!-- ImageView for image-based article elements -->
-    <ImageView
-        android:id="@+id/image_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        android:adjustViewBounds="true"
-        android:padding="8dp"
-        android:visibility="gone"
-        tools:src="@android:drawable/ic_menu_gallery" />
+        <!-- Text Content Element -->
+        <EditText
+            android:id="@+id/content_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:textSize="16sp"
+            android:textColor="@color/colorOnSurface"
+            android:fontFamily="sans-serif"
+            android:lineSpacingExtra="4dp"
+            android:padding="8dp"
+            android:minHeight="48dp"
+            android:gravity="top"
+            android:inputType="textMultiLine|textCapSentences"
+            android:hint="Start typing..."
+            android:textColorHint="@color/colorOnSurface"
+            android:alpha="0.6"/>
 
-    <!-- Minus (remove) icon overlay in the top-right corner -->
-    <ImageView
-        android:id="@+id/remove_icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_gravity="top|end"
-        android:layout_margin="8dp"
-        android:padding="6dp"
-        android:background="@android:color/holo_red_dark"
-        android:backgroundTint="@android:color/holo_red_dark"
-        android:src="@android:drawable/ic_delete"
-        android:scaleType="center"
-        android:clipToOutline="true"
-        android:outlineProvider="background"
-        android:visibility="gone" />
+        <!-- Image Content Element -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:id="@+id/image_container">
 
+            <ImageView
+                android:id="@+id/image_view"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
+                android:background="@color/colorSurface"
+                android:src="@drawable/ic_image_placeholder"/>
 
-</FrameLayout>
+            <ImageView
+                android:id="@+id/remove_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_close"
+                android:background="@drawable/circle_background_error"
+                android:padding="6dp"
+                app:tint="@android:color/white"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Remove image"/>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

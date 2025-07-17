@@ -1,21 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="16dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="8dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/colorSurface"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
-    <TextView
-        android:id="@+id/tvArticleTitle"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
 
-    <TextView
-        android:id="@+id/tvArticleStatus"
-        android:textSize="14sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-</LinearLayout>
+        <!-- Top Section: Title, Category, and Preview -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Main Content Area -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="12dp">
+
+                <!-- Title and Category Row -->
+                <!-- Title and Category Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvArticleTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Sample Article Title Goes Here"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorOnSurface"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:lineSpacingExtra="2dp"
+                        android:layout_marginEnd="8dp"/>
+
+                    <!-- Category Badge -->
+                    <TextView
+                        android:id="@+id/tvArticleCategory"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/category_badge"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:text="Technology"
+                        android:textColor="@color/colorSecondary"
+                        android:textSize="11sp"
+                        android:maxLines="1"/>
+
+                </LinearLayout>
+
+
+                <!-- Article Preview Text -->
+                <TextView
+                    android:id="@+id/tvArticlePreview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Article preview text that gives readers a glimpse of the content inside..."
+                    android:textSize="14sp"
+                    android:textColor="@color/colorOnSurface"
+                    android:alpha="0.7"
+                    android:fontFamily="sans-serif"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:layout_marginTop="8dp"
+                    android:lineSpacingExtra="2dp"/>
+
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_arrow_forward"
+                app:tint="@color/colorPrimary"
+                android:alpha="0.6"/>
+
+        </LinearLayout>
+
+        <!-- Divider for better separation -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorSurface"
+            android:layout_marginTop="16dp"/>
+
+        <!-- Bottom Section: Status and Metadata -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+
+            <!-- Status Badge (Aligned to the left) -->
+            <TextView
+                android:id="@+id/tvArticleStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/status_badge_published"
+                android:fontFamily="sans-serif-medium"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:text="Published"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="10sp" />
+
+            <!-- Separator Dot (Centered in the layout) -->
+            <View
+                android:id="@+id/separator_dot"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_centerInParent="true"
+                android:background="@drawable/circle_dot" />
+
+            <!-- Action Buttons (Optional, aligned to the right) -->
+            <LinearLayout
+                android:id="@+id/layoutActions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:gravity="end"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEdit"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="Edit"
+                    android:textAllCaps="false"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnView"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="View"
+                    android:textAllCaps="false"
+                    android:textSize="12sp"
+                    app:cornerRadius="18dp" />
+            </LinearLayout>
+
+            <!-- Article Date (Aligned to the right, or to the left of actions if they are visible) -->
+            <TextView
+                android:id="@+id/tvArticleDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/layoutActions"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:alpha="0.6"
+                android:fontFamily="sans-serif"
+                android:text="2 hours ago"
+                android:textColor="@color/colorOnSurface"
+                android:textSize="12sp" />
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -2,6 +2,9 @@ package com.example.newsreporter
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -13,13 +16,16 @@ import kotlinx.coroutines.withContext
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import androidx.recyclerview.widget.DividerItemDecoration
-import android. widget . Toast
-
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 
 class SavedDraftsActivity : AppCompatActivity() {
@@ -30,6 +36,9 @@ class SavedDraftsActivity : AppCompatActivity() {
     private lateinit var categoryAutoComplete: AutoCompleteTextView
     private lateinit var emptyStateContainer: ViewGroup
 
+    // ✅ ADD MISSING PROPERTY
+    private var allDrafts: List<Draft> = emptyList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_saved_drafts)
@@ -39,6 +48,7 @@ class SavedDraftsActivity : AppCompatActivity() {
         setupCategoryFilter()
         setupRecyclerView()
         setupFab()
+        setupDeleteAllButton()
 
         loadDrafts()
     }
@@ -57,15 +67,76 @@ class SavedDraftsActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener { onBackPressed() }
     }
 
+    // ✅ FIXED CATEGORY FILTER IMPLEMENTATION
     private fun setupCategoryFilter() {
-        val categories = resources.getStringArray(R.array.article_categories)
-        val adapter = ArrayAdapter(this, R.layout.item_dropdown, categories)
-        categoryAutoComplete.setAdapter(adapter)
-        categoryAutoComplete.setText(categories[0], false)
+        try {
+            val categories = resources.getStringArray(R.array.article_categories)
 
-        categoryAutoComplete.setOnItemClickListener { _, _, _, _ ->
-            loadDrafts()
+            val arrayAdapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                categories
+            )
+
+            categoryAutoComplete.setAdapter(arrayAdapter)
+            categoryAutoComplete.setText(categories[0], false)
+
+            categoryAutoComplete.setOnItemClickListener { _, _, position, _ ->
+                val selectedCategory = categories[position]
+                filterDraftsByCategory(selectedCategory)
+                updateDraftsCount()
+            }
+
+            categoryAutoComplete.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {}
+            })
+
+        } catch (e: Exception) {
+            Log.e("SavedDraftsActivity", "Error setting up category filter: ${e.message}")
+            showErrorMessage("Failed to load categories")
         }
+    }
+
+    // ✅ FIXED FILTER METHOD
+    private fun filterDraftsByCategory(category: String) {
+        val filteredDrafts = if (category == "All") {
+            allDrafts
+        } else {
+            allDrafts.filter { it.category == category }
+        }
+
+        // ✅ CORRECT - Use adapter instance, not static call
+        adapter.updateDrafts(filteredDrafts)
+        toggleEmptyState(filteredDrafts.isEmpty())
+    }
+
+    // ✅ FIXED UPDATE COUNT METHOD
+    private fun updateDraftsCount() {
+        // ✅ CORRECT - Access through adapter instance
+        val count = adapter.itemCount
+        val countText = findViewById<TextView>(R.id.tv_drafts_count)
+        countText?.text = "$count ${if (count == 1) "article" else "articles"}"
+    }
+
+    private fun toggleEmptyState(isEmpty: Boolean) {
+        val emptyContainer = findViewById<LinearLayout>(R.id.empty_state_container)
+        val recyclerView = findViewById<RecyclerView>(R.id.rv_saved_drafts)
+
+        if (isEmpty) {
+            emptyContainer?.visibility = View.VISIBLE
+            recyclerView?.visibility = View.GONE
+        } else {
+            emptyContainer?.visibility = View.GONE
+            recyclerView?.visibility = View.VISIBLE
+        }
+    }
+
+    private fun showErrorMessage(message: String) {
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+            .setBackgroundTint(ContextCompat.getColor(this, R.color.design_default_color_error))
+            .show()
     }
 
     private fun setupRecyclerView() {
@@ -82,9 +153,19 @@ class SavedDraftsActivity : AppCompatActivity() {
     }
 
     private fun setupFab() {
-        findViewById<FloatingActionButton>(R.id.fab_new_draft).setOnClickListener {
+        // ✅ CORRECT - Use ExtendedFloatingActionButton instead of FloatingActionButton
+        val fab = findViewById<ExtendedFloatingActionButton>(R.id.fab_new_draft)
+        fab.setOnClickListener {
             startActivity(Intent(this, DraftArticleActivity::class.java))
         }
+    }
+
+    // ✅ ADD MISSING DELETE ALL BUTTON SETUP
+    private fun setupDeleteAllButton() {
+        findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_delete_all_drafts)
+            ?.setOnClickListener {
+                showDeleteAllConfirmation()
+            }
     }
 
     private fun showDeleteConfirmation(draft: Draft) {
@@ -104,12 +185,14 @@ class SavedDraftsActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
+
     private fun navigateToDraftArticle(draft: Draft) {
         val intent = Intent(this, DraftArticleActivity::class.java)
         intent.putExtra("DRAFT_ID", draft.id)
         startActivity(intent)
     }
 
+    // ✅ FIXED LOAD DRAFTS METHOD
     private fun loadDrafts() {
         val selectedCategory = categoryAutoComplete.text.toString()
 
@@ -124,7 +207,11 @@ class SavedDraftsActivity : AppCompatActivity() {
                 }
 
                 val sortedDrafts = drafts.sortedByDescending { it.lastModified }
+
+                // ✅ UPDATE BOTH ADAPTER AND allDrafts PROPERTY
+                allDrafts = sortedDrafts
                 adapter.updateDrafts(sortedDrafts)
+                updateDraftsCount()
 
                 // Show/hide empty state
                 emptyStateContainer.visibility = if (sortedDrafts.isEmpty()) View.VISIBLE else View.GONE
@@ -145,7 +232,6 @@ class SavedDraftsActivity : AppCompatActivity() {
             .show()
     }
 
-
     private fun deleteDraft(draft: Draft) {
         lifecycleScope.launch {
             try {
@@ -153,6 +239,11 @@ class SavedDraftsActivity : AppCompatActivity() {
                     database.draftDao().deleteDraft(draft)
                 }
                 adapter.removeDraft(draft)
+
+                // ✅ UPDATE allDrafts PROPERTY
+                allDrafts = allDrafts.filter { it.id != draft.id }
+                updateDraftsCount()
+
                 showToast("Draft deleted successfully")
             } catch (e: Exception) {
                 showToast("Error deleting draft: ${e.localizedMessage}")
@@ -167,6 +258,11 @@ class SavedDraftsActivity : AppCompatActivity() {
                     database.draftDao().deleteAllDrafts()
                 }
                 adapter.clearDrafts()
+
+                // ✅ UPDATE allDrafts PROPERTY
+                allDrafts = emptyList()
+                updateDraftsCount()
+
                 showToast("All drafts deleted successfully")
             } catch (e: Exception) {
                 showToast("Error deleting all drafts: ${e.localizedMessage}")
@@ -178,12 +274,10 @@ class SavedDraftsActivity : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    // Refresh the list when returning to this activity.
     override fun onResume() {
         super.onResume()
         loadDrafts()
     }
-
 }
 
 
